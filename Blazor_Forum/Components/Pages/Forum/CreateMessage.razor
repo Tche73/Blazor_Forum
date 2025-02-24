@@ -1,0 +1,39 @@
+﻿@page "/forum/create"
+@using Blazor_Forum.Services
+@inject IForumService ForumService
+@inject NavigationManager NavigationManager
+
+<h3>Nouveau message</h3>
+
+<EditForm Model="@message" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="title">Titre</label>
+        <InputText id="title" @bind-Value="message.Title" class="form-control" />
+        <ValidationMessage For="@(() => message.Title)" />
+    </div>
+
+    <div class="form-group">
+        <label for="content">Contenu</label>
+        <InputTextArea id="content" @bind-Value="message.Content" class="form-control" rows="5" />
+        <ValidationMessage For="@(() => message.Content)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Publier</button>
+    <a href="/forum" class="btn btn-secondary">Annuler</a>
+</EditForm>
+
+@code {
+    private Message message = new() { CreatedAt = DateTime.Now };
+
+    private async Task HandleValidSubmit()
+    {
+        var result = await ForumService.CreateMessageAsync(message);
+        if (result != null)
+        {
+            NavigationManager.NavigateTo("/forum");
+        }
+    }
+}

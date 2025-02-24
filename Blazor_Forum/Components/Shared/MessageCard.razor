@@ -1,0 +1,39 @@
+﻿@using Blazor_Forum.Models
+@using Blazor_Forum.Services
+@inject IForumService ForumService
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h5 class="card-title">@Message.Title</h5>
+        <small class="text-muted">Publié le @Message.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+    </div>
+    <div class="card-body">
+        <p class="card-text">@Message.Content</p>
+        <div class="d-flex justify-content-between">
+            <div>
+                <LikeButton MessageId="@Message.Id" Likes="@Message.Likes.Count" />
+                <span class="ms-3">@Message.Responses.Count réponses</span>
+            </div>
+            <div>
+                <button class="btn btn-sm btn-danger" @onclick="DeleteMessage">Supprimer</button>
+                <a href="/forum/@Message.Id" class="btn btn-sm btn-primary">Détails</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Message Message { get; set; }
+
+    [Parameter]
+    public EventCallback OnDeleted { get; set; }
+
+    private async Task DeleteMessage()
+    {
+        if (await ForumService.DeleteMessageAsync(Message.Id))
+        {
+            await OnDeleted.InvokeAsync();
+        }
+    }
+}

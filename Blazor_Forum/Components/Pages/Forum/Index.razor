@@ -1,0 +1,40 @@
+﻿@page "/forum"
+@using Blazor_Forum.Models
+@using Blazor_Forum.Services
+@inject IForumService ForumService
+
+<h3>Forum</h3>
+
+<div class="mb-3">
+    <a href="/forum/create" class="btn btn-primary">Nouveau message</a>
+</div>
+
+@if (messages == null)
+{
+    <p>Chargement...</p>
+}
+else if (!messages.Any())
+{
+    <p>Aucun message pour le moment.</p>
+}
+else
+{
+    @foreach (var message in messages)
+    {
+        <MessageCard Message="@message" OnDeleted="LoadMessages" />
+    }
+}
+
+@code {
+    private List<Message> messages;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMessages();
+    }
+
+    private async Task LoadMessages()
+    {
+        messages = await ForumService.GetMessagesAsync();
+    }
+}

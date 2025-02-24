@@ -1,0 +1,40 @@
+﻿@using Blazor_Forum.Models
+@using Blazor_Forum.Services
+@inject IForumService ForumService
+
+<button class="btn btn-sm @(isLiked ? "btn-success" : "btn-outline-success")" @onclick="ToggleLike">
+    <i class="oi oi-thumb-up"></i> @Likes
+</button>
+
+@code {
+    [Parameter]
+    public int? MessageId { get; set; }
+
+    [Parameter]
+    public int? ResponseId { get; set; }
+
+    [Parameter]
+    public int Likes { get; set; }
+
+    private bool isLiked = false;
+
+    private async Task ToggleLike()
+    {
+        if (!isLiked)
+        {
+            var like = new Like
+                {
+                    CreatedAt = DateTime.Now,
+                    MessageId = MessageId,
+                    ResponseId = ResponseId
+                };
+
+            var result = await ForumService.CreateLikeAsync(like);
+            if (result != null)
+            {
+                isLiked = true;
+                Likes++;
+            }
+        }
+    }
+}
