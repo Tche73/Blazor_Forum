@@ -14,7 +14,7 @@ namespace Blazor_Forum.Models
         [Required]
         public int UserId { get; set; }
 
-        public Response Reponse { get; set; }
+        public Reponse Reponse { get; set; }
 
         public User User { get; set; }
     }

@@ -22,6 +22,7 @@ namespace Blazor_Forum.Models
 
         [Required]
         public int? UserId { get; set; }
+        public User User { get; set; }
 
         public Message Message { get; set; }
         public List<Like> Likes { get; set; } = new();

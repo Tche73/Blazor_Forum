@@ -17,7 +17,7 @@ namespace Blazor_Forum.Models
 
         public List<Message> Messages { get; set; } = new();
 
-        public List<Response> Reponses { get; set; } = new();
+        public List<Reponse> Reponses { get; set; } = new();
 
         public List<Like> Likes { get; set; } = new();
     }

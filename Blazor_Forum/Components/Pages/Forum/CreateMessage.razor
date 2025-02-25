@@ -11,15 +11,21 @@
     <ValidationSummary />
 
     <div class="form-group">
-        <label for="title">Titre</label>
-        <InputText id="title" @bind-Value="message.Title" class="form-control" />
-        <ValidationMessage For="@(() => message.Title)" />
+        <label for="contenu">Contenu</label>
+        <InputTextArea id="contenu" @bind-Value="message.Contenu" class="form-control" rows="5" />
+        <ValidationMessage For="@(() => message.Contenu)" />
     </div>
 
     <div class="form-group">
-        <label for="content">Contenu</label>
-        <InputTextArea id="content" @bind-Value="message.Content" class="form-control" rows="5" />
-        <ValidationMessage For="@(() => message.Content)" />
+        <label for="userId">Utilisateur</label>
+        <InputSelect id="userId" @bind-Value="message.UserId" class="form-control">
+            <option value="">-- Sélectionner un utilisateur --</option>
+            @foreach (var user in users)
+            {
+                <option value="@user.Id">@user.Username</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => message.UserId)" />
     </div>
 
     <button type="submit" class="btn btn-primary">Publier</button>
@@ -27,14 +33,29 @@
 </EditForm>
 
 @code {
-    private Message message = new() { CreatedAt = DateTime.Now };
+    private Message message = new() { DatePublication = DateTime.Now };
+    private List<User> users = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Charger la liste des utilisateurs pour le dropdown
+        users = await ForumService.GetUsersAsync();
+    }
 
     private async Task HandleValidSubmit()
     {
-        var result = await ForumService.CreateMessageAsync(message);
-        if (result != null)
+        try
         {
-            NavigationManager.NavigateTo("/forum");
+            var result = await ForumService.CreateMessageAsync(message);
+            if (result != null)
+            {
+                NavigationManager.NavigateTo("/forum");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Vous pourriez vouloir afficher un message d'erreur à l'utilisateur
+            Console.WriteLine($"Erreur: {ex.Message}");
         }
     }
 }

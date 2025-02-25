@@ -1,12 +1,17 @@
 using Blazor_Forum.Components;
+using Blazor_Forum.Data;
 using Blazor_Forum.Repositories;
 using Blazor_Forum.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddHttpClient<IForumService, ForumService>(client =>
 {
