@@ -1,4 +1,4 @@
-﻿using Azure;
+﻿
 using Blazor_Forum.Models;
 using Blazor_Forum.Services;
 using Microsoft.AspNetCore.Http.Connections;
@@ -19,7 +19,11 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<List<Message>>("api/Messages") ?? new List<Message>();
+                Console.WriteLine("Début de la récupération des messages...");
+                var result = await _httpClient.GetFromJsonAsync<List<Message>>("api/Messages");
+                Console.WriteLine($"Résultat: {result?.Count ?? 0} messages récupérés");
+                return result ?? new List<Message>();
+                //return await _httpClient.GetFromJsonAsync<List<Message>>("api/Messages") ?? new List<Message>();
             }
             catch (Exception ex)
             {
@@ -85,7 +89,7 @@ namespace Blazor_Forum.Repositories
         }
 
         // Reponses
-        public async Task<List<Reponse>> GetResponsesAsync()
+        public async Task<List<Reponse>> GetReponsesAsync()
         {
             try
             {
@@ -98,7 +102,7 @@ namespace Blazor_Forum.Repositories
             }
         }
 
-        public async Task<List<Reponse>> GetResponsesByMessageAsync(int messageId)
+        public async Task<List<Reponse>> GetReponsesByMessageAsync(int messageId)
         {
             try
             {
@@ -111,13 +115,13 @@ namespace Blazor_Forum.Repositories
             }
         }
 
-        public async Task<Reponse> CreateResponseAsync(Reponse reponse)
+        public async Task<Reponse> CreateReponseAsync(Reponse reponse)
         {
             try
             {
-                var httpResponse = await _httpClient.PostAsJsonAsync("api/Reponses", reponse);
-                httpResponse.EnsureSuccessStatusCode();
-                return await httpResponse.Content.ReadFromJsonAsync<Reponse>();
+                var response = await _httpClient.PostAsJsonAsync("api/Reponses", reponse);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<Reponse>();
             }
             catch (Exception ex)
             {

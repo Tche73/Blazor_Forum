@@ -1,5 +1,135 @@
-﻿<h3>MessageDetails</h3>
+﻿@page "/forum/{Id:int}"
+@using Blazor_Forum.Models
+@using Blazor_Forum.Services
+@inject IForumService ForumService
+@inject NavigationManager NavigationManager
+
+<div class="mb-3">
+    <a href="/forum" class="btn btn-outline-secondary">Retour à la liste</a>
+</div>
+
+@if (message == null)
+{
+    <p><em>Chargement...</em></p>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between">
+            <span>@(message.User?.Username ?? "Utilisateur inconnu")</span>
+            <small>@message.DatePublication.ToString("dd/MM/yyyy HH:mm")</small>
+        </div>
+        <div class="card-body">
+            <p class="card-text">@message.Contenu</p>
+        </div>
+    </div>
+
+    <h3>Réponses</h3>
+    
+    @if (!reponses.Any())
+    {
+        <p>Aucune réponse pour l'instant.</p>
+    }
+    else
+    {
+        <div class="list-group mb-4">
+            @foreach (var reponse in reponses)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">@(reponse.User?.Username ?? "Utilisateur inconnu")</h6>
+                        <small>@reponse.DatePublication.ToString("dd/MM/yyyy HH:mm")</small>
+                    </div>
+                    <p class="mb-1">@reponse.Contenu</p>
+                    <div class="d-flex justify-content-end">
+                        <LikeButton ReponseId="@reponse.Id" UserId="1" Likes="@reponse.Likes.Count" />
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">Ajouter une réponse</div>
+        <div class="card-body">
+            <EditForm Model="@newReponse" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                
+                <div class="form-group">
+                    <InputTextArea @bind-Value="newReponse.Contenu" class="form-control" rows="3" />
+                    <ValidationMessage For="@(() => newReponse.Contenu)" />
+                </div>
+                
+                <div class="form-group">
+                    <label>Utilisateur</label>
+                    <InputSelect @bind-Value="newReponse.UserId" class="form-control">
+                        <option value="">-- Sélectionner un utilisateur --</option>
+                        @foreach (var user in users)
+                        {
+                            <option value="@user.Id">@user.Username</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => newReponse.UserId)" />
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Publier</button>
+            </EditForm>
+        </div>
+    </div>
+}
 
 @code {
+    [Parameter]
+    public int Id { get; set; }
 
+    private Message message;
+    private List<Reponse> reponses = new();
+    private List<User> users = new();
+    private Reponse newReponse = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            message = await ForumService.GetMessageAsync(Id);
+            reponses = await ForumService.GetReponsesByMessageAsync(Id);
+            users = await ForumService.GetUsersAsync();
+            
+            // Initialiser la nouvelle réponse
+            newReponse = new Reponse
+            {
+                MessageId = Id,
+                DatePublication = DateTime.Now
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur: {ex.Message}");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var result = await ForumService.CreateReponseAsync(newReponse);
+            if (result != null)
+            {
+                // Ajouter la réponse à la liste
+                reponses.Add(result);
+                
+                // Réinitialiser le formulaire
+                newReponse = new Reponse
+                {
+                    MessageId = Id,
+                    DatePublication = DateTime.Now
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur: {ex.Message}");
+        }
+    }
 }

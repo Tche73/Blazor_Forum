@@ -8,23 +8,26 @@ namespace Blazor_Forum.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Le contenu est obligatoire")]
-        [StringLength(500, MinimumLength = 5, ErrorMessage = "La réponse doit contenir entre 5 et 500 caractères")]
+        [StringLength(2000, MinimumLength = 5, ErrorMessage = "La réponse doit contenir entre 5 et 2000 caractères")]
         [Display(Name = "Contenu")]
         public string Contenu { get; set; }
 
         [Required]
-        [Display(Name = "Date de création")]
+        [Display(Name = "Date de publication")]
         [DataType(DataType.DateTime)]
         public DateTime DatePublication { get; set; }
 
-        [Required(ErrorMessage = "L'ID du message parent est requis")]
+        [Required(ErrorMessage = "Le message parent est obligatoire")]
         public int MessageId { get; set; }
 
-        [Required]
-        public int? UserId { get; set; }
-        public User User { get; set; }
+        [Required(ErrorMessage = "L'utilisateur est obligatoire")]
+        public int UserId { get; set; }
 
         public Message Message { get; set; }
+
+        public User User { get; set; }
+
         public List<Like> Likes { get; set; } = new();
     }
+
 }

@@ -1,5 +1,4 @@
-﻿using Azure;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Blazor_Forum.Models
 {
@@ -16,8 +15,9 @@ namespace Blazor_Forum.Models
         [Display(Name = "Date de publication")]
         [DataType(DataType.DateTime)]
         public DateTime DatePublication { get; set; }
-        [Required]
-        public int? UserId { get; set; }
+
+        [Required(ErrorMessage = "L'utilisateur est obligatoire")]
+        public int UserId { get; set; }
 
         public User User { get; set; }
 

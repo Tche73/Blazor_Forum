@@ -1,0 +1,119 @@
+﻿@page "/forum"
+@using Blazor_Forum.Models
+@using Blazor_Forum.Services
+@inject IForumService ForumService
+@inject NavigationManager NavigationManager
+
+<h1>Forum de discussion</h1>
+
+<div class="mb-3">
+    <a href="/forum/create" class="btn btn-primary">Nouveau message</a>
+</div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@if (messages == null)
+{
+    <p><em>Chargement...</em></p>
+}
+else if (!messages.Any())
+{
+    <p>Aucun message n'a été publié pour le moment.</p>
+}
+else
+{
+    <div class="forum-container">
+        @foreach (var message in messages)
+        {
+            <div class="message-block">
+                <div class="message-header">
+                    <div class="user-info">
+                        <img src="/images/avatar-default.png" alt="Avatar" class="user-avatar" />
+                        <span class="username">@(message.User?.Username ?? "Utilisateur inconnu")</span>
+                    </div>
+                    <span class="post-date">@message.DatePublication.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+                <div class="message-content">
+                    <p>@message.Contenu</p>
+                </div>
+                
+                @if (message.Reponses.Any())
+                {
+                    <div class="responses">
+                        <h5>Réponses (@message.Reponses.Count)</h5>
+                        @foreach (var reponse in message.Reponses)
+                        {
+                            <div class="response-item">
+                                <div class="response-header">
+                                    <span class="username">@(reponse.User?.Username ?? "Utilisateur inconnu")</span>
+                                    <span class="post-date">@reponse.DatePublication.ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                                <div class="response-content">
+                                    <p>@reponse.Contenu</p>
+                                </div>
+                                <div class="response-footer">
+                                    <LikeButton ReponseId="@reponse.Id" UserId="1" Likes="@reponse.Likes.Count" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                
+                <div class="new-response">
+                    <h6>Répondre à ce message</h6>
+                    <ReponseForm MessageId="@message.Id" OnReponseAdded="RefreshMessages" />
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Message> messages;
+
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri("https://localhost:7024");
+            var response = await client.GetStringAsync("api/Messages");
+            Console.WriteLine(response);
+            messages = await ForumService.GetMessagesAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors du chargement des messages: {ex.Message}";
+            Console.WriteLine(errorMessage);
+        }
+    }
+    
+    private async Task LoadMessages()
+    {
+        try
+        {
+            messages = await ForumService.GetMessagesAsync();
+            
+            // Pour chaque message, charger ses réponses
+            foreach (var message in messages)
+            {
+                message.Reponses = await ForumService.GetReponsesByMessageAsync(message.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur: {ex.Message}");
+        }
+    }
+    
+    private async Task RefreshMessages()
+    {
+        await LoadMessages();
+        StateHasChanged();
+    }
+}

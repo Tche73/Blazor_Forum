@@ -6,31 +6,39 @@
 
 <h3>Nouveau message</h3>
 
-<EditForm Model="@message" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <EditForm Model="@message" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-    <div class="form-group">
-        <label for="contenu">Contenu</label>
-        <InputTextArea id="contenu" @bind-Value="message.Contenu" class="form-control" rows="5" />
-        <ValidationMessage For="@(() => message.Contenu)" />
+                    <div class="form-group mb-3">
+                        <label for="contenu">Contenu</label>
+                        <InputTextArea id="contenu" @bind-Value="message.Contenu" class="form-control" rows="5" />
+                        <ValidationMessage For="@(() => message.Contenu)" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="userId">Utilisateur</label>
+                        <InputSelect id="userId" @bind-Value="message.UserId" class="form-control">
+                            <option value="">-- Sélectionner un utilisateur --</option>
+                            @foreach (var user in users)
+                            {
+                                <option value="@user.Id">@user.Username</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => message.UserId)" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Publier</button>
+                    <a href="/forum" class="btn btn-secondary">Annuler</a>
+                </EditForm>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label for="userId">Utilisateur</label>
-        <InputSelect id="userId" @bind-Value="message.UserId" class="form-control">
-            <option value="">-- Sélectionner un utilisateur --</option>
-            @foreach (var user in users)
-            {
-                <option value="@user.Id">@user.Username</option>
-            }
-        </InputSelect>
-        <ValidationMessage For="@(() => message.UserId)" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Publier</button>
-    <a href="/forum" class="btn btn-secondary">Annuler</a>
-</EditForm>
+</div>
 
 @code {
     private Message message = new() { DatePublication = DateTime.Now };
@@ -38,7 +46,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Charger la liste des utilisateurs pour le dropdown
         users = await ForumService.GetUsersAsync();
     }
 
@@ -54,7 +61,6 @@
         }
         catch (Exception ex)
         {
-            // Vous pourriez vouloir afficher un message d'erreur à l'utilisateur
             Console.WriteLine($"Erreur: {ex.Message}");
         }
     }

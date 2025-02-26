@@ -1,6 +1,4 @@
-﻿using Azure;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Blazor_Forum.Models
 {
@@ -8,10 +6,10 @@ namespace Blazor_Forum.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "L'identifiant de la réponse est obligatoire")]
         public int ReponseId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "L'identifiant de l'utilisateur est obligatoire")]
         public int UserId { get; set; }
 
         public Reponse Reponse { get; set; }

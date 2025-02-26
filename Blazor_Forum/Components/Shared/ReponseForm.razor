@@ -1,0 +1,69 @@
+﻿@using Blazor_Forum.Models
+@using Blazor_Forum.Services
+@inject IForumService ForumService
+
+<div class="response-form">
+    <EditForm Model="@reponse" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <InputTextArea @bind-Value="reponse.Contenu" class="form-control" rows="2" placeholder="Votre réponse..." />
+            <ValidationMessage For="@(() => reponse.Contenu)" />
+        </div>
+
+        <div class="form-group">
+            <InputSelect @bind-Value="reponse.UserId" class="form-control">
+                <option value="">-- Sélectionner un utilisateur --</option>
+                @foreach (var user in users)
+                {
+                    <option value="@user.Id">@user.Username</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => reponse.UserId)" />
+        </div>
+
+        <button type="submit" class="btn btn-sm btn-primary">Répondre</button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public int MessageId { get; set; }
+
+    [Parameter]
+    public EventCallback OnReponseAdded { get; set; }
+
+    private Reponse reponse = new Reponse();
+    private List<User> users = new List<User>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await ForumService.GetUsersAsync();
+        reponse.MessageId = MessageId;
+        reponse.DatePublication = DateTime.Now;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var result = await ForumService.CreateReponseAsync(reponse);
+            if (result != null)
+            {
+                // Réinitialiser le formulaire
+                reponse = new Reponse
+                    {
+                        MessageId = MessageId,
+                        DatePublication = DateTime.Now
+                    };
+
+                // Notifier le parent que la réponse a été ajoutée
+                await OnReponseAdded.InvokeAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur: {ex.Message}");
+        }
+    }
+}

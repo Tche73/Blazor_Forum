@@ -1,6 +1,15 @@
-﻿<Router AppAssembly="@typeof(Program).Assembly">
+﻿@using Blazor_Forum.Components.Layout
+@using Microsoft.AspNetCore.Components.Routing
+
+<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p role="alert">Désolé, cette page n'existe pas.</p>
+        </LayoutView>
+    </NotFound>
 </Router>
