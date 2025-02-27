@@ -2,7 +2,7 @@
 @using Blazor_Forum.Services
 @inject IForumService ForumService
 
-<button class="btn btn-sm @(isLiked ? "btn-success" : "btn-outline-success")" @onclick="ToggleLike">
+<button class="btn btn-sm @(isLiked ? "btn-primary" : "btn-outline-primary")" @onclick="ToggleLike">
     <i class="oi oi-thumb-up"></i> @likeCount
 </button>
 
@@ -18,39 +18,76 @@
 
     private bool isLiked = false;
     private int likeCount;
-    private Like userLike;
+    private Like currentLike;
 
     protected override void OnInitialized()
     {
         likeCount = Likes;
+        // Nous vérifierons l'état du like après le premier rendu
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await CheckLikeStatus();
+        }
+    }
+
+    private async Task CheckLikeStatus()
+    {
+        try
+        {
+            // Vérifier si l'utilisateur a déjà liké cette réponse
+            var likes = await ForumService.GetLikesByReponseAsync(ReponseId);
+            var userLike = likes.FirstOrDefault(l => l.UserId == UserId);
+
+            if (userLike != null)
+            {
+                isLiked = true;
+                currentLike = userLike;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors de la vérification du statut du like: {ex.Message}");
+        }
     }
 
     private async Task ToggleLike()
     {
-        if (!isLiked)
+        try
         {
-            // Ajouter un like
-            var like = new Like
-                {
-                    ReponseId = ReponseId,
-                    UserId = UserId
-                };
-
-            var result = await ForumService.AddLikeAsync(like);
-            if (result != null)
+            if (!isLiked)
             {
-                userLike = result;
-                isLiked = true;
-                likeCount++;
+                // Ajouter un like
+                var like = new Like
+                    {
+                        ReponseId = ReponseId,
+                        UserId = UserId
+                    };
+
+                var result = await ForumService.AddLikeAsync(like);
+                if (result != null)
+                {
+                    currentLike = result;
+                    isLiked = true;
+                    likeCount++;
+                }
+            }
+            else if (currentLike != null)
+            {
+                // Supprimer le like
+                await ForumService.RemoveLikeAsync(currentLike.Id);
+                isLiked = false;
+                likeCount--;
+                currentLike = null;
             }
         }
-        else if (userLike != null)
+        catch (Exception ex)
         {
-            // Supprimer le like
-            await ForumService.RemoveLikeAsync(userLike.Id);
-            isLiked = false;
-            likeCount--;
-            userLike = null;
+            Console.WriteLine($"Erreur lors du toggle du like: {ex.Message}");
         }
     }
 }

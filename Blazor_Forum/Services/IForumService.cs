@@ -16,6 +16,7 @@ namespace Blazor_Forum.Services
         Task<List<Reponse>> GetReponsesAsync();
         Task<List<Reponse>> GetReponsesByMessageAsync(int messageId);
         Task<Reponse> CreateReponseAsync(Reponse reponse);
+        Task<List<Like>> GetLikesByReponseAsync(int reponseId);
 
         // Users
         Task<List<User>> GetUsersAsync();

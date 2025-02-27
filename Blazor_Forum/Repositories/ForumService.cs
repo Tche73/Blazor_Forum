@@ -1,7 +1,7 @@
 ﻿
 using Blazor_Forum.Models;
 using Blazor_Forum.Services;
-using Microsoft.AspNetCore.Http.Connections;
+using System.Text.Json;
 
 namespace Blazor_Forum.Repositories
 {
@@ -15,22 +15,39 @@ namespace Blazor_Forum.Repositories
         }
 
         // Messages
+
         public async Task<List<Message>> GetMessagesAsync()
         {
             try
             {
-                Console.WriteLine("Début de la récupération des messages...");
-                var result = await _httpClient.GetFromJsonAsync<List<Message>>("api/Messages");
-                Console.WriteLine($"Résultat: {result?.Count ?? 0} messages récupérés");
-                return result ?? new List<Message>();
-                //return await _httpClient.GetFromJsonAsync<List<Message>>("api/Messages") ?? new List<Message>();
+                // Utilisez GetFromJsonAsync pour simplifier la récupération
+                var messages = await _httpClient.GetFromJsonAsync<List<Message>>("api/Messages");
+
+                // Ajoutez des logs pour le débogage
+                Console.WriteLine($"Nombre de messages récupérés : {messages?.Count ?? 0}");
+
+                // Pour chaque message, ajoutez des logs sur les réponses
+                if (messages != null)
+                {
+                    foreach (var message in messages)
+                    {
+                        Console.WriteLine($"Message ID: {message.Id}, Nombre de réponses: {message.Reponses?.Count ?? 0}");
+                    }
+                }
+
+                return messages ?? new List<Message>();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors de la récupération des messages: {ex.Message}");
+                Console.WriteLine($"Erreur lors de la récupération des messages : {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
                 return new List<Message>();
             }
         }
+        
 
         public async Task<Message> GetMessageAsync(int id)
         {
@@ -106,11 +123,31 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<List<Reponse>>($"api/Messages/{messageId}/Reponses") ?? new List<Reponse>();
+                var apiUrl = $"api/Messages/{messageId}/Reponses";
+                Console.WriteLine($"Appel de l'API pour les réponses: {_httpClient.BaseAddress}{apiUrl}");
+
+                var response = await _httpClient.GetAsync(apiUrl);
+                Console.WriteLine($"Statut de la réponse: {response.StatusCode}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Erreur API: {response.StatusCode}");
+                    return new List<Reponse>();
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Contenu de la réponse pour les réponses: {content}");
+
+                var reponses = JsonSerializer.Deserialize<List<Reponse>>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                return reponses ?? new List<Reponse>();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erreur lors de la récupération des réponses du message {messageId}: {ex.Message}");
+                if (ex.InnerException != null)
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
                 return new List<Reponse>();
             }
         }
@@ -127,6 +164,39 @@ namespace Blazor_Forum.Repositories
             {
                 Console.WriteLine($"Erreur lors de la création de la réponse: {ex.Message}");
                 throw;
+            }
+        }
+
+        public async Task<List<Like>> GetLikesByReponseAsync(int reponseId)
+        {
+            try
+            {
+                var apiUrl = $"api/Reponses/{reponseId}/Likes";
+                Console.WriteLine($"Appel de l'API pour les likes: {_httpClient.BaseAddress}{apiUrl}");
+
+                var response = await _httpClient.GetAsync(apiUrl);
+                Console.WriteLine($"Statut de la réponse: {response.StatusCode}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Erreur API: {response.StatusCode}");
+                    return new List<Like>();
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Contenu de la réponse pour les likes: {content}");
+
+                var likes = JsonSerializer.Deserialize<List<Like>>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                return likes ?? new List<Like>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la récupération des likes de la réponse {reponseId}: {ex.Message}");
+                if (ex.InnerException != null)
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                return new List<Like>();
             }
         }
 

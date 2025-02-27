@@ -11,7 +11,7 @@ namespace Blazor_Forum.Models
         [Display(Name = "Contenu")]
         public string Contenu { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "La date de publication est obligatoire")]
         [Display(Name = "Date de publication")]
         [DataType(DataType.DateTime)]
         public DateTime DatePublication { get; set; }
@@ -21,7 +21,6 @@ namespace Blazor_Forum.Models
 
         public User User { get; set; }
 
-        public List<Reponse> Reponses { get; set; } = new();
+        public List<Reponse> Reponses { get; set; } = new List<Reponse>();
     }
-
 }
