@@ -2,8 +2,12 @@
 @using Blazor_Forum.Services
 @inject IForumService ForumService
 
-<button class="btn btn-sm @(isLiked ? "btn-primary" : "btn-outline-primary")" @onclick="ToggleLike">
+@* <button class="btn btn-sm @(isLiked ? "btn-primary" : "btn-outline-primary")" @onclick="ToggleLike">
     <i class="oi oi-thumb-up"></i> @likeCount
+</button> *@
+
+<button class="btn btn-sm btn-danger" @onclick="ToggleLike" style="display:block;margin:5px;">
+    👍 @likeCount
 </button>
 
 @code {

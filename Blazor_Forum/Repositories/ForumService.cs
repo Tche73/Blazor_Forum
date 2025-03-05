@@ -8,10 +8,22 @@ namespace Blazor_Forum.Repositories
     public class ForumService : IForumService
     {
         private readonly HttpClient _httpClient;
+        private readonly AuthService _authService;
 
-        public ForumService(HttpClient httpClient)
+        public ForumService(HttpClient httpClient, AuthService authService)
         {
             _httpClient = httpClient;
+            _authService = authService;
+        }
+
+        private async Task SetAuthorizationHeader()
+        {
+            var token = await _authService.GetTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
         // Messages
@@ -19,7 +31,7 @@ namespace Blazor_Forum.Repositories
         public async Task<List<Message>> GetMessagesAsync()
         {
             try
-            {
+            {                
                 // Utilisez GetFromJsonAsync pour simplifier la récupération
                 var messages = await _httpClient.GetFromJsonAsync<List<Message>>("api/Messages");
 
@@ -53,6 +65,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 return await _httpClient.GetFromJsonAsync<Message>($"api/Messages/{id}");
             }
             catch (Exception ex)
@@ -66,6 +79,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 var response = await _httpClient.PostAsJsonAsync("api/Messages", message);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<Message>();
@@ -81,6 +95,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 var response = await _httpClient.PutAsJsonAsync($"api/Messages/{id}", message);
                 response.EnsureSuccessStatusCode();
             }
@@ -95,6 +110,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 var response = await _httpClient.DeleteAsync($"api/Messages/{id}");
                 response.EnsureSuccessStatusCode();
             }
@@ -110,6 +126,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 return await _httpClient.GetFromJsonAsync<List<Reponse>>("api/Reponses") ?? new List<Reponse>();
             }
             catch (Exception ex)
@@ -123,6 +140,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 var apiUrl = $"api/Messages/{messageId}/Reponses";
                 Console.WriteLine($"Appel de l'API pour les réponses: {_httpClient.BaseAddress}{apiUrl}");
 
@@ -156,6 +174,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 var response = await _httpClient.PostAsJsonAsync("api/Reponses", reponse);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<Reponse>();
@@ -171,6 +190,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 var apiUrl = $"api/Reponses/{reponseId}/Likes";
                 Console.WriteLine($"Appel de l'API pour les likes: {_httpClient.BaseAddress}{apiUrl}");
 
@@ -205,6 +225,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 return await _httpClient.GetFromJsonAsync<List<User>>("api/Users") ?? new List<User>();
             }
             catch (Exception ex)
@@ -218,6 +239,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 return await _httpClient.GetFromJsonAsync<User>($"api/Users/{id}");
             }
             catch (Exception ex)
@@ -232,6 +254,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 var response = await _httpClient.PostAsJsonAsync("api/Likes", like);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<Like>();
@@ -247,6 +270,7 @@ namespace Blazor_Forum.Repositories
         {
             try
             {
+                await SetAuthorizationHeader();
                 var response = await _httpClient.DeleteAsync($"api/Likes/{id}");
                 response.EnsureSuccessStatusCode();
             }

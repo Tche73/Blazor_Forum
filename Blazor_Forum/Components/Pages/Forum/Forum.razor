@@ -9,6 +9,8 @@
 
 <div class="mb-3">
     <a href="/forum/create" class="btn btn-primary">Nouveau message</a>
+    <button class="btn btn-secondary" @onclick="RefreshMessages">Recharger</button>
+
 </div>
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -34,12 +36,13 @@ else
                     <div class="user-info">
                         <span class="username">@(message.User?.Username ?? "Utilisateur inconnu")</span>
                     </div>
-                    <span class="post-date">@message.DatePublication.ToString("dd/MM/yyyy HH:mm")</span>
-                </div>
+                        <span class="post-date">@message.DatePublication.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
                 <div class="message-content">
                     <p>@message.Contenu</p>
+                    <p>Nombre de réponses : @(message.Reponses?.Count ?? 0)</p>
                 </div>
-                
+               
                 @if (message.Reponses != null && message.Reponses.Any())
                 {
                     <div class="responses">
@@ -91,31 +94,37 @@ else
             isLoading = false;
         }
     }
-    
+
     private async Task LoadMessages()
     {
         try
         {
+            Console.WriteLine("Début du chargement des messages...");
             // Récupérer les messages
             messages = await ForumService.GetMessagesAsync();
-            
-            if (messages != null && messages.Any())
-            {
+            Console.WriteLine($"Nombre de messages récupérés : {messages?.Count ?? 0}");
+
+            // if (messages != null && messages.Any())
+            // {
                 // Pour chaque message, charger ses réponses
                 foreach (var message in messages)
                 {
                     try
                     {
-                        var reponses = await ForumService.GetReponsesByMessageAsync(message.Id);
-                        message.Reponses = reponses ?? new List<Reponse>();
+                        // var reponses = await ForumService.GetReponsesByMessageAsync(message.Id);
+                        // message.Reponses = reponses ?? new List<Reponse>();
+                        Console.WriteLine($"Message ID: {message.Id}, Nombre de réponses: {message.Reponses?.Count ?? 0}");
+                        
+                        StateHasChanged();
                     }
                     catch (Exception ex)
                     {
                         // On continue même si on ne peut pas charger les réponses d'un message
-                        message.Reponses = new List<Reponse>();
+                        // message.Reponses = new List<Reponse>();
+                        errorMessage = $"Erreur lors du chargement des messages: {ex.Message}";
                     }
                 }
-            }
+            // }
         }
         catch (Exception ex)
         {

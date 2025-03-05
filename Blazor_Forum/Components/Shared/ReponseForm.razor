@@ -3,7 +3,7 @@
 @inject IForumService ForumService
 
 <div class="response-form">
-    <EditForm Model="@reponse" OnValidSubmit="HandleValidSubmit">
+    <EditForm Model="@reponse" OnValidSubmit="HandleValidSubmit" FormName="reponseForm">
         <DataAnnotationsValidator />
 
         <div class="form-group">

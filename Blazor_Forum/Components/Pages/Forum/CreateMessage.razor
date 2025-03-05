@@ -10,7 +10,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-body">
-                <EditForm Model="@message" OnValidSubmit="HandleValidSubmit">
+                <EditForm Model="@message" OnValidSubmit="HandleValidSubmit" FormName="createMessageForm">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
 

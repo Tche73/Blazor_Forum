@@ -52,7 +52,7 @@ else
     <div class="card">
         <div class="card-header">Ajouter une réponse</div>
         <div class="card-body">
-            <EditForm Model="@newReponse" OnValidSubmit="HandleValidSubmit">
+            <EditForm Model="@newReponse" OnValidSubmit="HandleValidSubmit" FormName="detailsMessageForm">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
                 
